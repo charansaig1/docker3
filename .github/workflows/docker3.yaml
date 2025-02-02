@@ -1,4 +1,4 @@
-name: Build and Run Docker Container
+name: Build Docker Image
 
 on:
   push:
@@ -16,29 +16,36 @@ jobs:
       # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v2
-      # Step 2: Set up Node.js
+
       - name: Set up Node.js (for building the React app)
         uses: actions/setup-node@v2
         with:
           node-version: "14"
-      # Step 3: Set up Docker Buildx
+
+      #steep 2: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 3: Set up Docker
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      # Step 4: Build Docker image
-      - name: Build Docker image
+
+      # Step 4: Build Docker image and list
+      - name: Build a Docker image
         run: |
-          docker build -t my-app:latest .
+          docker build -t docker2img:latest .
           docker images
-      # Step 5: Get Docker image ID
+
+      # Step 4: Get Docker image ID
       - name: Get Docker image ID
         id: image_id
         run: |
-          IMAGE_ID=$(docker images -q docker1img:latest)
+          IMAGE_ID=$(docker images -q docker2img:latest)
           echo "IMAGE_ID=${IMAGE_ID}"
           echo "IMAGE_ID=${IMAGE_ID}" >> $GITHUB_ENV
           echo "::set-output name=IMAGE_ID::$IMAGE_ID"
 
-        # Step 5: Create Docker container using the port from the .env file
+      # Step 5: Create Docker container using the port from the .env file
       - name: Create Docker container
         run: |
           # Load .env file
@@ -56,7 +63,7 @@ jobs:
           fi
 
           # Run the container with the correct port mapping
-          docker run -d --name simpleRectjs -p ${APP_PORT}:${APP_PORT} ${{ steps.image_id.outputs.IMAGE_ID }}
+          docker run -d --name simpleRectjs1 -p ${APP_PORT}:${APP_PORT} ${{ steps.image_id.outputs.IMAGE_ID }}
           docker ps -a
 
       - name: Stop Docker container
