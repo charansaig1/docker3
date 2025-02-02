@@ -67,4 +67,4 @@ jobs:
           docker ps -a
 
       - name: Stop Docker container
-        run: docker stop simpleRectjs
+        run: docker stop simpleRectjs1
