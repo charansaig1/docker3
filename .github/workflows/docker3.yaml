@@ -1,0 +1,63 @@
+name: Build and Run Docker Container
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      # Step 2: Set up Node.js
+      - name: Set up Node.js (for building the React app)
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      # Step 3: Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      # Step 4: Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t my-app:latest .
+          docker images
+      # Step 5: Get Docker image ID
+      - name: Get Docker image ID
+        id: image_id
+        run: |
+          IMAGE_ID=$(docker images -q docker1img:latest)
+          echo "IMAGE_ID=${IMAGE_ID}"
+          echo "IMAGE_ID=${IMAGE_ID}" >> $GITHUB_ENV
+          echo "::set-output name=IMAGE_ID::$IMAGE_ID"
+
+        # Step 5: Create Docker container using the port from the .env file
+      - name: Create Docker container
+        run: |
+          # Load .env file
+          set -a
+          source .env
+          set +a
+
+          echo "Using APP_PORT=${APP_PORT} from .env file"
+          echo "Using IMAGE_ID=${{ steps.image_id.outputs.IMAGE_ID }}"
+
+          # Ensure IMAGE_ID is set
+          if [[ -z "${{ steps.image_id.outputs.IMAGE_ID }}" ]]; then
+            echo "Error: IMAGE_ID is empty!"
+            exit 1
+          fi
+
+          # Run the container with the correct port mapping
+          docker run -d --name simpleRectjs -p ${APP_PORT}:${APP_PORT} ${{ steps.image_id.outputs.IMAGE_ID }}
+          docker ps -a
+
+      - name: Stop Docker container
+        run: docker stop simpleRectjs
