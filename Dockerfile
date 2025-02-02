@@ -22,7 +22,7 @@ FROM nginx:alpine AS production
 COPY --from=builder /usr/src/app/build /usr/share/nginx/html
 
 # Expose port 80 (default port for Nginx)
-EXPOSE 80
-
+ENV PORT=${APP_PORT}
+EXPOSE ${APP_PORT}
 # Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]
