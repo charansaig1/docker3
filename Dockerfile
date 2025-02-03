@@ -25,4 +25,5 @@ COPY --from=builder /usr/src/app/build /usr/share/nginx/html
 ENV PORT=${APP_PORT}
 EXPOSE ${APP_PORT}
 # Start Nginx server
-CMD ["nginx", "-g", "daemon off;"]
+CMD npm start
+# CMD ["nginx", "-g", "daemon off;"]
